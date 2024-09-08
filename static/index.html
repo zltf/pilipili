@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="static/css/index.css">
+    <title>噼哩噼哩-听视频</title>
+</head>
+<body>
+    <div class="main">
+        <iframe id="player" src="" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="400" height="200"></iframe>
+
+        <input type="number" v-model="cur_video.cur_time"/>
+        <button @click="set_time">设置时间</button>
+
+        <script src="static/lib/vue.min.js"></script>
+        <script src="static/lib/axios.min.js"></script>
+    </div>
+
+    <script>
+        new Vue({
+            el: '.main',
+            data: {
+                play_queue: [
+                    {
+                        name: "春娇与志明1",
+                        bvid: "BV1Mz421k7pg",
+                        end_time: 10,
+                    },
+                    {
+                        name: "春娇与志明2",
+                        bvid: "BV13u411b7T5",
+                        end_time: 15,
+                    },
+                ],
+                cur_video: {
+                    queue_idx: 0,
+                    bvid: "",
+                    cur_time: 0,
+                    end_time: 0,
+                },
+            },
+            computed: {
+                player_src: function() {
+                    return "https://www.bilibili.com/blackboard/html5mobileplayer.html?bvid=" + this.cur_video.bvid + "&page=1&as_wide=1&danmaku=0&hasMuteButton=1&autoplay=1&fjw=0&t=" + this.cur_video.cur_time;
+                }
+            },
+            methods: {
+                refresh_player_src() {
+                    let player = document.getElementById("player");
+                    player.src = this.player_src;
+                },
+                set_time () {
+                    this.refresh_player_src();
+                },
+                play_next_video () {
+                    let first_video = this.play_queue[this.cur_video.queue_idx];
+                    this.cur_video.bvid = first_video.bvid;
+                    this.cur_video.cur_time = 0;
+                    this.cur_video.end_time = first_video.end_time;
+                    this.cur_video.queue_idx++;
+                    if(this.cur_video.queue_idx == this.play_queue.length) {
+                        this.cur_video.queue_idx = 0;
+                    }
+                    this.refresh_player_src();
+                },
+                init() {
+                    this.play_next_video();
+                },
+            },
+            mounted() {
+                this.init();
+                setInterval(() => {
+                    this.cur_video.cur_time++;
+                    if(this.cur_video.cur_time > this.cur_video.end_time) {
+                        this.play_next_video();
+                    }
+                }, 1000);
+            },
+        })
+    </script>
+</body>
